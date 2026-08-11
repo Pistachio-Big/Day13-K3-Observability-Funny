@@ -37,7 +37,21 @@ def percentile(values: list[int], p: int) -> float:
 
 
 
+def error_rate_pct() -> float:
+    """Tỷ lệ lỗi = số request lỗi / tổng request nhận * 100.
+
+    TRAFFIC đếm request thành công (record_request); ERRORS đếm request lỗi
+    (record_error). Tổng request nhận = thành công + lỗi.
+    """
+    error_count = sum(ERRORS.values())
+    total_requests = TRAFFIC + error_count
+    if total_requests == 0:
+        return 0.0
+    return round(error_count / total_requests * 100, 2)
+
+
 def snapshot() -> dict:
+    error_count = sum(ERRORS.values())
     return {
         "traffic": TRAFFIC,
         "latency_p50": percentile(REQUEST_LATENCIES, 50),
@@ -47,6 +61,8 @@ def snapshot() -> dict:
         "total_cost_usd": round(sum(REQUEST_COSTS), 4),
         "tokens_in_total": sum(REQUEST_TOKENS_IN),
         "tokens_out_total": sum(REQUEST_TOKENS_OUT),
+        "error_count": error_count,
+        "error_rate_pct": error_rate_pct(),
         "error_breakdown": dict(ERRORS),
         "quality_avg": round(mean(QUALITY_SCORES), 4) if QUALITY_SCORES else 0.0,
     }
