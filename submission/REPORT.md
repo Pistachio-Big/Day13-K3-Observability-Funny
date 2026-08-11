@@ -49,13 +49,16 @@
 
 ## 6. Điều tra challenge
 
-- Challenge ID:
-- Triệu chứng từ metrics:
-- Trace ID liên quan:
-- Log line/correlation ID liên quan:
-- Root cause:
-- Fix action:
+- Challenge ID: `day13-k3-observability-v1` (cohort K3, incident `rag_slow`, feature `refund`, ngưỡng 2000ms)
+- Triệu chứng từ metrics: sau khi chạy `load_test --challenge`, `latency_p50` nhảy từ **151ms → 2651ms**, `p95` vượt cả ngưỡng challenge 2000ms lẫn SLO dashboard 3000ms; `error_rate_pct = 0%` và token/cost không đổi → chỉ **latency tăng**, khu trú ở feature `refund`. Panel Latency trên dashboard (`cp3_dashboard_incident.png`) chạm ngưỡng đỏ.
+- Trace ID liên quan: `0e69a3723bbf55247140f649f83a5ee7` (session `k3-challenge-s05`, total 2.66s). Trong waterfall: span **`rag_retrieve` = 2505ms** trong khi **`llm_generate` = 151ms** (không đổi) → nút thắt nằm ở bước RAG, không phải LLM.
+- Log line/correlation ID liên quan: `req-240004f4` → `response_sent` `feature=refund` `latency_ms=2652` (đối chứng request lành mạnh `req-046cad7f` cùng feature chỉ `latency_ms=151`).
+- Root cause: sự cố `rag_slow` khiến `retrieve()` chạy `time.sleep(2.5)` ở [app/mock_rag.py:17-18](../app/mock_rag.py) cho mọi request khi `STATE["rag_slow"]` bật → mỗi truy vấn refund bị cộng thêm ~2.5s ở bước truy hồi tài liệu.
+- Fix action: tắt sự cố `POST /incidents/rag_slow/disable` (đã xác nhận metrics về 151ms); trong hệ thống thật: sửa/nâng vector store chậm và **đặt timeout ngắn cho RAG** để fail-fast thay vì chờ 2.5s.
 - Preventive measure:
+  1. Timeout + fallback cho bước RAG (không để 1 dependency chậm kéo toàn bộ latency).
+  2. Alert `HighLatencyP95` (`latency_p95_ms > 3000` trong 5m) đã cấu hình sẵn → phát hiện tự động; kèm dashboard có SLO line.
+  3. Giữ span riêng `rag_retrieve`/`llm_generate` (đã thêm ở CP2) để lần sau khoanh vùng nút thắt trong vài giây.
 
 ## 7. Đóng góp cá nhân
 
