@@ -2,7 +2,7 @@
 
 ## 1. Thông tin nhóm
 
-- Tên nhóm: Pistachio-Big (K3) — _đổi nếu tên nhóm khác_
+- Tên nhóm: Funny
 - Repository URL: https://github.com/Pistachio-Big/Day13-K3-Observability-Funny
 - Commit SHA cuối: `0fea9d22ddaec3514da2d97bb8e4d7b03e0fe611`
 - Thành viên và vai trò:
