@@ -2,24 +2,29 @@
 
 ## 1. Thông tin nhóm
 
-- Tên nhóm:
-- Repository URL:
-- Commit SHA cuối:
+- Tên nhóm: Pistachio-Big (K3) — _đổi nếu tên nhóm khác_
+- Repository URL: https://github.com/Pistachio-Big/Day13-K3-Observability-Funny
+- Commit SHA cuối: `0fea9d22ddaec3514da2d97bb8e4d7b03e0fe611`
 - Thành viên và vai trò:
+  - Hoàng Văn Phái (2A202601575) — A: API & Middleware
+  - Nguyễn Huy Anh (2A202601641) — B: Security / PII
+  - Phạm Trung Kiên (2A202601986) — C: Metrics & Dashboard
+  - Hà Tấn Phong (2A202601577) — D: SRE & Alerts
+  - Nguyễn Văn Đại (2A202601217) — E: QA & Chief Investigator (Langfuse, tracing, điều tra)
 
 ## 2. Kết quả kỹ thuật
 
-- Điểm `validate_logs.py`:
-- Tổng số traces:
-- Số PII leak còn lại:
-- Link/đường dẫn dashboard:
+- Điểm `validate_logs.py`: **100/100** (baseline ban đầu 30/100)
+- Tổng số traces: ≥ 40 trace trên Langfuse (10 baseline + 10 candidate + 10 challenge + các lần practice), mỗi trace có waterfall `run → rag_retrieve + llm_generate`
+- Số PII leak còn lại: **0** (email/SĐT/CCCD/thẻ đều `[REDACTED_*]`)
+- Link/đường dẫn dashboard: `submission/evidence/cp2_dashboard.png` (baseline) và `submission/evidence/cp3_dashboard_incident.png` (lúc sự cố), sinh bằng `scripts/build_dashboard.py`; contract `python scripts/validate_dashboard.py` → `6/6 panel`
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID:
-- Evidence PII redaction:
-- Evidence trace waterfall:
-- Giải thích một span đáng chú ý:
+- Evidence correlation ID: `cp1_response_headers.txt` (header `x-request-id` + `x-response-time-ms`) và `cp1_log_enriched.txt` (log `response_sent` có `correlation_id` + đủ enrichment)
+- Evidence PII redaction: `cp1_pii_redacted.txt` (log đã che email/SĐT/thẻ) và `cp1_validate_logs.txt` / `cp1_validate_100.png` (100/100)
+- Evidence trace waterfall: `cp2_trace_baseline.png` — trace `run` gồm span con `rag_retrieve` và `llm_generate`
+- Giải thích một span đáng chú ý: span **`rag_retrieve`** — lúc bình thường ~0ms, khi sự cố `rag_slow` bật thì lên **2505ms** trong khi `llm_generate` vẫn 151ms; chính span này giúp khoanh vùng root cause ở CP3 (xem §6)
 
 ## 4. Prompt versioning
 
@@ -62,8 +67,12 @@
 
 ## 7. Đóng góp cá nhân
 
-Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
+Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng. Cột "Điều đã học" là gợi ý theo vai trò — mỗi người chỉnh lại theo ý mình.
 
-| Thành viên | Phần việc | Commit/PR | Điều đã học |
+| Thành viên (MSSV) | Phần việc | Commit/PR | Điều đã học |
 |---|---|---|---|
-| | | | |
+| Hoàng Văn Phái (2A202601575) | A — Middleware, correlation ID `req-<8hex>`, enrich log, exception handler; điều tra CP3 (đối chiếu correlation_id log↔trace↔metrics) | PR #1 · `a1b7b35` | Correlation ID + contextvars giúp truy vết một request xuyên suốt log |
+| Nguyễn Huy Anh (2A202601641) | B — PII scrubbing, thêm regex passport/địa chỉ, đăng ký processor; điều tra CP3 (dùng log chứng minh latency) | PR #2 · `dda429b` | Redact PII ở tầng processor đảm bảo không lộ dữ liệu dù log ở đâu |
+| Phạm Trung Kiên (2A202601986) | C — `error_rate_pct`, spec dashboard 6 panel; điều tra CP3 (đọc metrics ra triệu chứng) | PR #3 · `ddbcf8d` | Cách tính error_rate_pct và đọc percentile p50/p95/p99 |
+| Hà Tấn Phong (2A202601577) | D — SLO, 3 alert rules, runbook; điều tra CP3 (đề xuất fix + preventive) | PR #4 · `372bc36` | Alert nên dựa triệu chứng/SLO và kèm runbook để xử lý nhanh |
+| Nguyễn Văn Đại (2A202601217) | E — Langfuse, span trace RAG/LLM, prompt v1/v2 + rollback, dashboard runtime, dẫn dắt điều tra CP3, tổng hợp report | PR #5 · `bd5234b`; PR #6 · `a860b9d` | Luồng Metrics→Traces→Logs và prompt versioning/rollback trên Langfuse |
