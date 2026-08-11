@@ -3,14 +3,17 @@ window: 28d
 slis:
   latency_p95_ms:
     objective: 3000
-    target: 99.5
-    note: Replace with your group's target
+    target: 99.0
+    note: 99% khoảng thời gian, P95 latency phải ≤ 3000ms. Ngưỡng 3s là mức người dùng chat còn chấp nhận được cho câu trả lời có RAG.
   error_rate_pct:
     objective: 2
     target: 99.0
+    note: Tỷ lệ lỗi 5 phút ≤ 2%. Vượt 2% là dấu hiệu tool_fail hoặc lỗi hệ thống ảnh hưởng trực tiếp người dùng.
   daily_cost_usd:
     objective: 2.5
     target: 100.0
+    note: Tổng chi phí token mỗi ngày ≤ 2.5 USD. Vượt ngưỡng thường do cost_spike (output tokens tăng đột biến).
   quality_score_avg:
     objective: 0.75
     target: 95.0
+    note: Điểm quality proxy trung bình ≥ 0.75 trong 95% cửa sổ đo. Thấp hơn báo hiệu chất lượng trả lời giảm.
