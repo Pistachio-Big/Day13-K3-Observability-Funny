@@ -1,19 +1,19 @@
 alerts:
-  - name: TODO_alert_1
-    severity: TODO
-    condition: TODO
+  - name: HighErrorRate
+    severity: P1
+    condition: error_rate_pct > 2 for 5m
     type: symptom-based
-    owner: TODO
+    owner: sre-oncall
     runbook: docs/alerts.md#alert-1
-  - name: TODO_alert_2
-    severity: TODO
-    condition: TODO
+  - name: HighLatencyP95
+    severity: P2
+    condition: latency_p95_ms > 3000 for 5m
     type: symptom-based
-    owner: TODO
+    owner: sre-oncall
     runbook: docs/alerts.md#alert-2
-  - name: TODO_alert_3
-    severity: TODO
-    condition: TODO
+  - name: DailyCostSpike
+    severity: P2
+    condition: daily_cost_usd > 2.5 for 10m
     type: symptom-based
-    owner: TODO
+    owner: platform-oncall
     runbook: docs/alerts.md#alert-3
